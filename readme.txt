@@ -16,7 +16,7 @@ Deficiencies:
   2) I'm not sure what the signifigance of the time stamps is on a stats cachedump. I thought it represented age, but I'm not sure, related write-hosts have been commented out.
      Example:
       STATS CACHEDUMP 8 0
-      ITEM tester-testie:735e9fc8-b9ef-4787-a21e-a02abc8529b3 [284 b; 1266530886 s] (what does '1266530886 s' indicate)
+      ITEM tester-testie:735e9fc8-b9ef-4787-a21e-a02abc8529b3 [284 b; 1266530886 s] (what does '1266530886 s' indicate??)
       END      
 
 Adam Kahtava - http://adam.kahtava.com/ - MIT Licensed
