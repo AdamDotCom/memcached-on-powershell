@@ -7,10 +7,12 @@
 #  Get your Memcached Stats
 #    PS> Memcached-Stats 'www.livejournal.com' '11211'
 #
-#	Adam Kahtava - http://adam.kahtava.com/ - MIT Licensed    
+# Adam Kahtava - http://adam.kahtava.com/ - MIT Licensed    
+#
 #-------------------------------------------------------------------
 
 function global:Memcached-Stats($server, $port){
+
   #-----------------------------------------------------------------
   # Functions local to the script
   #-----------------------------------------------------------------
@@ -27,19 +29,20 @@ function global:Memcached-Stats($server, $port){
   function script:get-Slabs($results){
     $slabs = @()
     $regex = 'STAT (?<slabid>.*):'
-    foreach ($dude in [regex]::matches($result, $regex)) {
-      $item = [int]$dude.Groups['slabid'].Captures[0].Value
+    foreach ($match in [regex]::matches($results, $regex)) {
+      $item = [int]$match.Groups['slabid'].Captures[0].Value
       if ($item -notcontains $last){
         $slabs += $item
       }
       $last = $item
     }
+    
     return $slabs
   }
 
   function script:write-Slabs($slabs){
-    if (!$slabs){
-      write-host 'No slabs found' -fore yellow
+    if ($slabs -eq $null){
+      write-host 'No slabs found' -fore red
       return
     }
     foreach ($slab in $slabs){
@@ -63,11 +66,11 @@ function global:Memcached-Stats($server, $port){
     }
     
     $regex = 'ITEM (?<keyid>.*) \[([0-9].*) b; (?<timestamp>.*) s'
-    foreach ($item in [regex]::matches($result, $regex)) {
-      write-host `t 'Age: ' -fore green -no; 	
-      write-host (script:convert-From-Unix-Timestamp($item.Groups['timestamp'].Captures[0].Value)) -no
+    foreach ($match in [regex]::matches($result, $regex)) {
+      #write-host `t 'Age: ' -fore green -no;
+      #write-host (script:convert-From-Unix-Timestamp($match.Groups['timestamp'].Captures[0].Value)) -no
       write-host `t 'Key: ' -fore green -no; 
-      write-host $item.Groups['keyid'].Captures[0].Value; 
+      write-host $match.Groups['keyid'].Captures[0].Value; 
     }
   }
   
