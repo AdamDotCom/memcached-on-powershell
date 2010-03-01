@@ -1,6 +1,6 @@
 #-------------------------------------------------------------------
 #
-#	Prints Memcached Cache stats to PowerShell
+# Prints Memcached Cache stats to PowerShell
 #
 # Sample usage:
 #    
@@ -10,7 +10,7 @@
 #	Adam Kahtava - http://adam.kahtava.com/ - MIT Licensed    
 #-------------------------------------------------------------------
 
-function global:Memcached-Stats($server, $port) {
+function global:Memcached-Stats($server, $port){
   #-----------------------------------------------------------------
   # Functions local to the script
   #-----------------------------------------------------------------
