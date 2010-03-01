@@ -5,14 +5,14 @@ Read more about Memcached here: http://en.wikipedia.org/wiki/Memcached
 Usage:
     
   Get your Memcached Stats
-    PS> Memcached-Stats '127.0.0.1' '11211'
+    PS> Memcached-Stats '127.0.0.1' '11411'
 
-Take a look at the screenshot: 
+Take a look at the screenshot: http://github.com/AdamDotCom/memcached-on-powershell/raw/master/memcached-on-powershot-screenshot.png
 
 IMPORTANT! 'Memcached-Stats' makes use of the memcache 'stats cachedump' command which has significant performance implications. This script is for testing purposes only. DO NOT use it on production as it may lock memcache when large datasets are present. 
 
 Deficiencies: 
-  1) The Memcached 'stats cachedump' command returns at most 2MB worth of results. This can be resolved by paging through the cachedump, but has not yet been implemented in this script.
+  1) The Memcached 'stats cachedump' command returns at most 2MB worth of results. This can be resolved by paging through the cachedump, but hasn't been implemented in this script.
   2) I'm not sure what the signifigance of the time stamps is on a stats cachedump. I thought it represented age, but I'm not sure, related write-hosts have been commented out.
      Example:
       STATS CACHEDUMP 8 0

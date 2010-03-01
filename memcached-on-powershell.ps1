@@ -5,7 +5,7 @@
 # Sample usage:
 #    
 #  Get your Memcached Stats
-#    PS> Memcached-Stats 'www.livejournal.com' '11211'
+#    PS> Memcached-Stats '127.0.0.1' '11411'
 #
 # Adam Kahtava - http://adam.kahtava.com/ - MIT Licensed    
 #
