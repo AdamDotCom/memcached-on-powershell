@@ -16,7 +16,7 @@ function global:Memcached-Stats($server, $port){
   #-----------------------------------------------------------------
   # Functions local to the script
   #-----------------------------------------------------------------
-  function get-Command-Result($command, $stream, $writer){
+  function get-Command-Result($command){
     $writer.WriteLine($command)
     $writer.Flush()
     
@@ -48,25 +48,17 @@ function global:Memcached-Stats($server, $port){
     foreach ($slab in $slabs){
       write-host 'Stats for Slab: ' $slab -fore yellow
   
-      $writer.WriteLine(('stats cachedump {0} 0' -f $slab))
-      $writer.Flush()
-        
-      $buffer = (new-object System.Byte[] 4096)
-      $read = $stream.Read($buffer, 0, 4096) 
-      
-      $result = ((new-object System.Text.AsciiEncoding).GetString($buffer, 0, $read))
-      
-      write-Cache-Dump $results	
+      write-Cache-Dump (get-Command-Result ('stats cachedump {0} 0' -f $slab))
     }
   }
   
   function write-Cache-Dump($results){
-    if ($result.length -eq 5){
+    if ($results.length -eq 5){
       write-host `t 'Empty' -fore red
     }
     
     $regex = 'ITEM (?<keyid>.*) \[([0-9].*) b; (?<timestamp>.*) s'
-    foreach ($match in [regex]::matches($result, $regex)) {
+    foreach ($match in [regex]::matches($results, $regex)) {
       #write-host `t 'Age: ' -fore green -no;
       #write-host (convert-From-Unix-Timestamp($match.Groups['timestamp'].Captures[0].Value)) -no
       write-host `t 'Key: ' -fore green -no; 
@@ -86,5 +78,5 @@ function global:Memcached-Stats($server, $port){
   $stream = $socket.GetStream() 
   $writer = new-object System.IO.StreamWriter $stream 
 
-  write-Slabs (get-Slabs (get-Command-Result 'stats slabs' $stream $writer))
+  write-Slabs (get-Slabs (get-Command-Result 'stats slabs'))
 }
