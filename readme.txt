@@ -1,5 +1,7 @@
 A PowerShell script that displays your Memcached cache statistics or deletes your Memcached objects
 
+Read more about this script here: http://adam.kahtava.com/journal/2010/03/09/memcached-on-powershell/
+
 Read more about Memcached here: http://en.wikipedia.org/wiki/Memcached
 
 Sample usage:
