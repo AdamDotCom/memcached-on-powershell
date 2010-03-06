@@ -11,12 +11,9 @@
 #
 #-------------------------------------------------------------------
 
-function global:Memcached-Stats($server, $port){
+function global:memcached-on-powershell{
 
-  #-----------------------------------------------------------------
-  # Functions local to the script
-  #-----------------------------------------------------------------
-  function get-Command-Result($command){
+  function script:get-Command-Result($command){
     $writer.WriteLine($command)
     $writer.Flush()
     
@@ -26,10 +23,10 @@ function global:Memcached-Stats($server, $port){
     return ((new-object System.Text.AsciiEncoding).GetString($buffer, 0, $read))
   }
 
-  function get-Slabs($results){
+  function script:get-Slabs($results){
     $slabs = @()
     $regex = 'STAT (?<slabid>.*):'
-    foreach ($match in [regex]::matches($results, $regex)) {
+    foreach ($match in [regex]::matches($results, $regex)){
       $item = [int]$match.Groups['slabid'].Captures[0].Value
       if ($item -notcontains $last){
         $slabs += $item
@@ -40,7 +37,7 @@ function global:Memcached-Stats($server, $port){
     return $slabs
   }
 
-  function write-Slabs($slabs){
+  function script:write-Slabs($slabs){
     if ($slabs -eq $null){
       write-host 'No slabs found' -fore red
       return
@@ -52,31 +49,57 @@ function global:Memcached-Stats($server, $port){
     }
   }
   
-  function write-Cache-Dump($results){
+  function script:write-Cache-Dump($results){
     if ($results.length -eq 5){
       write-host `t 'Empty' -fore red
     }
     
     $regex = 'ITEM (?<keyid>.*) \[([0-9].*) b; (?<timestamp>.*) s'
-    foreach ($match in [regex]::matches($results, $regex)) {
-      #write-host `t 'Age: ' -fore green -no;
-      #write-host (convert-From-Unix-Timestamp($match.Groups['timestamp'].Captures[0].Value)) -no
+    foreach ($match in [regex]::matches($results, $regex)){
       write-host `t 'Key: ' -fore green -no; 
       write-host $match.Groups['keyid'].Captures[0].Value; 
     }
   }
   
-  function convert-From-Unix-Timestamp($timestamp){
-      $origin = new-object DateTime(1970, 1, 1, 0, 0, 0, 0);
-      $origin.AddSeconds($timestamp);
+  function script:write-Slab-Stats($results){
+    $regex = 'STAT curr_items (?<totalItems>.*)'
+    foreach ($match in [regex]::matches($results, $regex)){
+      write-host 'Total items in cache: ' ($match.Groups['totalItems'].Captures[0].Value) -fore red
+    }   
   }
+}
 
-  #-----------------------------------------------------------------
-  # Main	
-  #-----------------------------------------------------------------
+function global:remove-all-items($server, $port){
+  memcached-on-powershell # Load in memcache symbols
+
+  $socket = new-object System.Net.Sockets.TcpClient($server, $port)
+  $stream = $socket.GetStream() 
+  $writer = new-object System.IO.StreamWriter $stream 
+  
+  $slabs = (get-Slabs (get-Command-Result 'stats slabs'))
+  
+  foreach ($slab in $slabs){
+    do{
+      $results = get-Command-Result ('stats cachedump {0} 0' -f $slab)
+      
+      $regex = 'ITEM (?<keyid>.*) \['    
+      foreach ($match in [regex]::matches($results, $regex)){
+        $key = $match.Groups['keyid'].Captures[0].Value
+        $deleteResult = get-Command-Result ('delete {0}' -f $key)
+      }
+    } while ($results.length -gt 5)
+  }
+  
+  write-Slab-Stats (get-Command-Result 'stats') 
+}
+
+function global:Memcached-Stats($server, $port){
+  memcached-on-powershell # Load in memcache symbols
+
   $socket = new-object System.Net.Sockets.TcpClient($server, $port)
   $stream = $socket.GetStream() 
   $writer = new-object System.IO.StreamWriter $stream 
 
+  write-Slab-Stats (get-Command-Result 'stats') 
   write-Slabs (get-Slabs (get-Command-Result 'stats slabs'))
-}
+} 
