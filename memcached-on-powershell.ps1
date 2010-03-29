@@ -20,8 +20,8 @@ function global:memcached-on-powershell{
     $writer.WriteLine($command)
     $writer.Flush()
     
-    $buffer = (new-object System.Byte[] 4096)
-    $read = $stream.Read($buffer, 0, 4096) 
+    $buffer = (new-object System.Byte[] 10240)
+    $read = $stream.Read($buffer, 0, 10240) 
     
     return ((new-object System.Text.AsciiEncoding).GetString($buffer, 0, $read))
   }
